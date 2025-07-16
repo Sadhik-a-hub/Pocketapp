@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import TodoForm from "../Screens/todoForm";
-import TodoList from "../Screens/todoList";
+import TodoForm from "./TodoForm";
+import TodoList from "./TodoList";
 import { getTodos } from "./api";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
