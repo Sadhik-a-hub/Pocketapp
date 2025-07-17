@@ -1,24 +1,31 @@
+// In routes/user.routes.js
 const express = require("express");
 const router = express.Router();
-const { body, validationResult } = require("express-validator");
-const mypocketcontroller = require('../controller/user.controller')
 const passport = require("passport");
-const todosController = require('../controller/todotask.controller')
+const { body, validationResult } = require("express-validator");
+
+const upload = require("../middleware/multerConfig"); 
+const authMiddleware = require("../middleware/authMiddleware"); 
+
+const userController = require("../controller/user.controller");
+const todosController = require("../controller/todotask.controller");
+
+
 
 const registrationValidationRules = [
   body("fullname")
     .notEmpty()
     .withMessage("Name is required")
     .isLength({ min: 3, max: 50 })
-    .withMessage("Name must be between 3 and 50 characters")
+    .withMessage("Name must be 3–50 characters")
     .matches(/^[A-Za-z\s]+$/)
-    .withMessage("Name must contain only letters and spaces"),
+    .withMessage("Only letters and spaces allowed"),
 
   body("email")
     .notEmpty()
     .withMessage("Email is required")
     .isEmail()
-    .withMessage("Enter a valid email")
+    .withMessage("Invalid email format")
     .matches(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/)
     .withMessage("Email must be in lowercase only"),
 
@@ -28,22 +35,17 @@ const registrationValidationRules = [
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters")
     .matches(/[A-Z]/)
-    .withMessage("Password must contain at least one uppercase letter")
+    .withMessage("At least one uppercase letter required")
     .matches(/[a-z]/)
-    .withMessage("Password must contain at least one lowercase letter")
+    .withMessage("At least one lowercase letter required")
     .matches(/[0-9]/)
-    .withMessage("Password must contain at least one number")
+    .withMessage("At least one number required")
     .matches(/[@$!%*?&]/)
-    .withMessage("Password must contain at least one special character"),
+    .withMessage("At least one special character required"),
 ];
 
 const loginValidationRules = [
-  body("email")
-    .notEmpty()
-    .withMessage("Email is required")
-    .isEmail()
-    .withMessage("Enter a valid email"),
-
+  body("email").notEmpty().withMessage("Email is required").isEmail(),
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
@@ -55,37 +57,54 @@ const validateRequest = (req, res, next) => {
   next();
 };
 
-// Routes
+router.get(
+  "/protected",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.json({
+      message: "You accessed protected data!",
+      user: req.user, 
+    });
+  }
+);
+
+router.post(
+  "/upload-aadhaar",
+  authMiddleware,
+  upload.single("aadhaar"),
+  userController.uploadAadhaar
+);
+
+
 router.post(
   "/register",
   registrationValidationRules,
   validateRequest,
-  mypocketcontroller.createmypocketinfo
+  userController.createmypocketinfo
 );
 
-router.post(
-  "/create",
-  passport.authenticate("jwt", { session: false }),
-  todosController.createTask
-);
 
 router.post(
   "/login",
   loginValidationRules,
   validateRequest,
-  mypocketcontroller.loginmypocketinfo
+  userController.loginmypocketinfo
 );
-router.post("/forgot-password", mypocketcontroller.forgotPassword);
 
 
-router.get("/", mypocketcontroller.getmypocketinfo);
-router.get("/:id", mypocketcontroller.getbyidmypocketinfo);
-router.get(
-  "/secure-data",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    res.json({ message: "Secure access granted", user: req.user });
-  }
-);
+router.post("/forgot-password", userController.forgotPassword);
+
+
+router.post("/create", authMiddleware, todosController.createTask);
+
+
+router.get("/", userController.getmypocketinfo);
+
+router.get("/:id", userController.getbyidmypocketinfo);
+
+
+router.get("/secure-data", authMiddleware, (req, res) => {
+  res.json({ message: "Secure access granted", user: req.user });
+});
 
 module.exports = router;

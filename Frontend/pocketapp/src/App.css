@@ -1,3 +1,9 @@
 body {
   font-family: 'Poppins', sans-serif;
 }
+.show-on-click {
+  display: none;
+}
+.show-on-click.show {
+  display: block;
+}

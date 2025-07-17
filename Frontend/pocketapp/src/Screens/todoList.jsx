@@ -1,5 +1,4 @@
-// src/components/TodoList.jsx
-import { deleteTodo } from "../Screens/api";
+import { deleteTodo } from "../service/api";
 import { toast } from "react-toastify";
 
 const todoList = ({ todos, refreshTodos, setEditTask }) => {

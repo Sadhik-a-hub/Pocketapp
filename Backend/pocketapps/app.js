@@ -4,33 +4,31 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
-const { sequelize } = require("./model/Database");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const passport = require("passport");
-require("./middleware/Passport");
 
-// Import Routers
-const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
-const mypocketRouter = require("./routes/User.routes");
-const todoRouter = require("./routes/todo.routes");
+const { sequelize } = require("./model/index");
 
 const app = express();
 
-//  Database Connection
+
 sequelize
   .authenticate()
-  .then(() => console.log(" Connected to MySQL database"))
-  .catch((err) => console.error(" Database connection failed:", err));
+  .then(() => console.log("✅ Connected to MySQL database"))
+  .catch((err) => console.error("❌ Database connection failed:", err));
 
 sequelize
-  .sync({ alter: true })
-  .then(() => console.log(" Database and tables synced"))
-  .catch((err) => console.error(" Sync error:", err));
+  .sync({ alter: true }) 
+  .then(() => console.log("✅ Database tables synced"))
+  .catch((err) => console.error("❌ Sync error:", err));
 
-//  Security Middleware
+
+require("./config/Passport");
+app.use(passport.initialize());
+
+
 app.use(helmet());
 app.use(
   cors({
@@ -39,42 +37,49 @@ app.use(
   })
 );
 
+
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000, 
+  max: 100, 
 });
 app.use(limiter);
 
-//  Standard Middleware
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
-app.use(passport.initialize());
 
-//  View Engine (optional)
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(express.static(path.join(__dirname, "public")));
+
+
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
-// Routes
+
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
+const mypocketRouter = require("./routes/User.routes");
+const todoRouter = require("./routes/todo.routes");
+
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-app.use("/api/mypocket", mypocketRouter);
-app.use("/api/todos", todoRouter);
+app.use("/api/mypocket", mypocketRouter); 
+app.use("/api/todos", todoRouter); 
 
-//  404 Handler
+
 app.use((req, res, next) => {
-  next(createError(404, "Endpoint not found"));
+  next(createError(404, "❌ Endpoint not found"));
 });
 
-// Error Handler
 app.use((err, req, res, next) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
-  // JSON error for API routes
   if (req.originalUrl.startsWith("/api")) {
+   
     return res.status(err.status || 500).json({
       error: {
         message: err.message,
@@ -83,7 +88,7 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Render error page for web routes
+
   res.status(err.status || 500);
   res.render("error");
 });

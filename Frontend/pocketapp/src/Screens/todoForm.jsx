@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createTodo, updateTodo } from "../Screens/api";
+import { createTodo, updateTodo } from "../service/api";
 import { toast } from "react-toastify";
 
 const TodoForm = ({ refreshTodos, editTask, setEditTask }) => {

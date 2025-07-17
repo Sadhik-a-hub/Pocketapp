@@ -1,146 +1,130 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { validateForgotPassword } from "../Screens/Validation";
+import { validateForgotPassword } from "./Validation";
+import { forgotPassword } from "../service/api";
 
-function ForgotPassword() {
-  const [email, setEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+
+const ForgotPassword = () => {
+  const [formData, setFormData] = useState({ email: "", newPassword: "" });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const validationErrors = validateForgotPassword({
-      email,
-      newPassword,
-      confirmPassword,
-    });
-
+    const validationErrors = validateForgotPassword(formData);
     setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length > 0) return;
-
-    try {
-      const response = await axios.post(
-        "http://localhost:3002/api/mypocket/forgot-password",
-        {
-          email,
-          newPassword,
-        }
-      );
-
-      toast.success(response.data.message || "Password reset successful");
-      setEmail("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setErrors({});
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+    if (Object.keys(validationErrors).length === 0) {
+      try {
+        await forgotPassword(formData);
+        toast.success("Password reset successful!");
+        setFormData({ email: "", newPassword: "" });
+        setTimeout(() => navigate("/login"), 2000);
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Reset failed");
+      }
     }
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
-      <div
-        className="card p-4 shadow"
-        style={{ width: "100%", maxWidth: "400px" }}
-      >
-        <h3 className="text-center mb-4">Forgot Password</h3>
-        <form onSubmit={handleSubmit}>
-          {/* Email Field */}
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">
-              Email address
-            </label>
-            <input
-              type="email"
-              className={`form-control ${errors.email ? "is-invalid" : ""}`}
-              id="email"
-              placeholder="Enter email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {errors.email && (
-              <div className="invalid-feedback">{errors.email}</div>
-            )}
+    <div className="container-fluid vh-100">
+      <div className="row h-100">
+        {/* Left Side - Branding */}
+        <div
+          className="col-md-6 d-none d-md-flex align-items-center justify-content-center text-white"
+          style={{
+            background: "linear-gradient(135deg, #ff7e5f, #feb47b)",
+          }}
+        >
+          <div className="text-center px-4">
+            <h1 className="display-4 fw-bold">My PocketApp</h1>
+            <p className="lead">
+              Forgot your password? Reset it and get back on track!
+            </p>
           </div>
+        </div>
 
-          {/* New Password Field */}
-          <div className="mb-3">
-            <label htmlFor="newPassword" className="form-label">
-              New Password
-            </label>
-            <div className="input-group">
-              <input
-                type={showPassword ? "text" : "password"}
-                className={`form-control ${
-                  errors.newPassword ? "is-invalid" : ""
-                }`}
-                id="newPassword"
-                placeholder="Enter new password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-            {errors.newPassword && (
-              <div className="invalid-feedback d-block">
-                {errors.newPassword}
+        {/* Right Side - Forgot Password Form */}
+        <div className="col-md-6 d-flex align-items-center justify-content-center bg-light">
+          <div className="card p-4 shadow-lg w-75">
+            <h3 className="text-center mb-4 text-danger">Reset Password</h3>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                />
+                {errors.email && (
+                  <div className="invalid-feedback">{errors.email}</div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Confirm Password Field */}
-          <div className="mb-3">
-            <label htmlFor="confirmPassword" className="form-label">
-              Confirm Password
-            </label>
-            <div className="input-group">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                className={`form-control ${
-                  errors.confirmPassword ? "is-invalid" : ""
-                }`}
-                id="confirmPassword"
-                placeholder="Re-enter new password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-            {errors.confirmPassword && (
-              <div className="invalid-feedback d-block">
-                {errors.confirmPassword}
+              <div className="mb-3 position-relative">
+                <label>New Password</label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="newPassword"
+                  className={`form-control ${
+                    errors.newPassword ? "is-invalid" : ""
+                  }`}
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  placeholder="Enter new password"
+                />
+                {errors.newPassword && (
+                  <div className="invalid-feedback">{errors.newPassword}</div>
+                )}
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    right: "15px",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    userSelect: "none",
+                    fontSize: "14px",
+                    color: "#007bff",
+                  }}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </span>
               </div>
-            )}
-          </div>
 
-          <button type="submit" className="btn btn-primary w-100">
-            Reset Password
-          </button>
-        </form>
-        <ToastContainer />
+              <button type="submit" className="btn btn-danger w-100">
+                Reset Password
+              </button>
+            </form>
+
+            <div className="mt-3 text-center">
+              <span className="text-muted">
+                Remember your password?{" "}
+                <a
+                  href="/login"
+                  className="text-decoration-none fw-bold text-success"
+                >
+                  Login
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <ToastContainer />
     </div>
   );
-}
+};
 
 export default ForgotPassword;

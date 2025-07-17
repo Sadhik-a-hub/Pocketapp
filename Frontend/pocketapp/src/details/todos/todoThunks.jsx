@@ -4,8 +4,9 @@ import {
   createTodo,
   updateTodo,
   deleteTodo,
-} from "../../Screens/api";
+} from "../../service/api";
 
+// Fetch Todos Thunk
 export const fetchTodos = createAsyncThunk(
   "todos/fetchTodos",
   async (_, thunkAPI) => {
@@ -18,6 +19,7 @@ export const fetchTodos = createAsyncThunk(
   }
 );
 
+// Add Todo Thunk
 export const addTodo = createAsyncThunk(
   "todos/addTodo",
   async (data, thunkAPI) => {
@@ -30,6 +32,7 @@ export const addTodo = createAsyncThunk(
   }
 );
 
+// Edit Todo Thunk
 export const editTodo = createAsyncThunk(
   "todos/editTodo",
   async ({ id, data }, thunkAPI) => {
@@ -42,6 +45,7 @@ export const editTodo = createAsyncThunk(
   }
 );
 
+// Remove Todo Thunk
 export const removeTodo = createAsyncThunk(
   "todos/removeTodo",
   async (id, thunkAPI) => {

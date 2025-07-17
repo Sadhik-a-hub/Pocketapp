@@ -1,10 +1,10 @@
-const { mypocket_info } = require('../model/Database');
+const { mypocket_info } = require('../model/index');
 const jwt = require("jsonwebtoken");
 const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 const bcrypt = require("bcryptjs");
 
 module.exports = {
-  //  Register user
+  
   async createmypocketinfo(req, res) {
     try {
       const { fullname, password } = req.body;
@@ -121,4 +121,26 @@ module.exports = {
       res.status(400).json({ error: error.message });
     }
   },
+  async uploadAadhaar(req, res) {
+  try {
+    const userId = req.user.id; // from JWT middleware
+    const aadhaarPath = req.file.path;
+
+   await mypocket_info.update({ aadhaarPath }, { where: { id: userId } });
+console.log("User ID:", userId);
+console.log("Aadhaar file path:", aadhaarPath);
+
+
+    return res
+      .status(200)
+      .json({ message: "Aadhaar uploaded successfully", path: aadhaarPath });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Upload failed" });
+  }
+},
 };
+
+
+
+ 

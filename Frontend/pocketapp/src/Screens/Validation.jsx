@@ -41,6 +41,8 @@ export const validateRegistration = (values) => {
     }
   }
 
+  
+
   //  Confirm Password check
   if (!values.confirmPassword) {
     errors.confirmPassword = "Confirm Password is required";

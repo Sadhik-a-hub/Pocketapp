@@ -1,4 +1,4 @@
-const Database = require("../model/Database")
+const Database = require("../model/index")
 
 const Todo = Database.todo_tasks
 

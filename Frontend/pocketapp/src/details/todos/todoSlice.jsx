@@ -4,25 +4,45 @@ import { fetchTodos, addTodo, editTodo, removeTodo } from "./todoThunks";
 const todoSlice = createSlice({
   name: "todos",
   initialState: {
-    items: [],
+    todos: [],
     loading: false,
     error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(fetchTodos.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchTodos.fulfilled, (state, action) => {
-        state.items = action.payload;
+        state.loading = false;
+        state.todos = action.payload; // ✅ Fix: Use `todos` not `items`
+      })
+      .addCase(fetchTodos.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(addTodo.pending, (state) => {
+        state.loading = true;
       })
       .addCase(addTodo.fulfilled, (state, action) => {
-        state.items.push(action.payload);
+        state.loading = false;
+        state.todos.push(action.payload); // ✅ Fix
       })
+      .addCase(addTodo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
       .addCase(editTodo.fulfilled, (state, action) => {
-        const idx = state.items.findIndex((t) => t.id === action.payload.id);
-        if (idx !== -1) state.items[idx] = action.payload;
+        const idx = state.todos.findIndex((t) => t.id === action.payload.id);
+        if (idx !== -1) state.todos[idx] = action.payload; // 
       })
+
       .addCase(removeTodo.fulfilled, (state, action) => {
-        state.items = state.items.filter((t) => t.id !== action.payload);
+        state.todos = state.todos.filter((t) => t.id !== action.payload); 
       });
   },
 });

@@ -1,4 +1,4 @@
-// model/user.js
+
 module.exports = (sequelize, DataTypes) => {
   const userLogin = sequelize.define(
     "mypocket_info",
@@ -31,7 +31,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(100),
         allowNull: false,
       },
+      aadhaarPath: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     },
+
     {
       timestamps: false,
     }
