@@ -14,6 +14,7 @@ const { sequelize } = require("./model/index");
 const app = express();
 
 
+
 sequelize
   .authenticate()
   .then(() => console.log("✅ Connected to MySQL database"))
@@ -24,6 +25,9 @@ sequelize
   .then(() => console.log("✅ Database tables synced"))
   .catch((err) => console.error("❌ Sync error:", err));
 
+
+
+app.use(express.json());
 
 require("./config/Passport");
 app.use(passport.initialize());

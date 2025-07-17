@@ -1,4 +1,3 @@
-// Redux-based Wallet.jsx with Aadhaar upload and todos loading via Redux Toolkit
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTodos } from "../details/todos/todoThunks";
@@ -13,8 +12,6 @@ const Wallet = () => {
   const navigate = useNavigate();
 
   const { todos } = useSelector((state) => state.todos);
-
-
   const { user } = useSelector((state) => state.auth);
 
   const [filter, setFilter] = useState("all");
@@ -26,6 +23,7 @@ const Wallet = () => {
 
   useEffect(() => {
     dispatch(fetchTodos());
+   
   }, [dispatch]);
 
   const handleLogout = () => {
@@ -86,7 +84,15 @@ const Wallet = () => {
     >
       <div className="container">
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-          <h2 className="fw-bold">Welcome, {user?.fullname || "User"}</h2>
+          <div>
+            <h2 className="fw-bold">Welcome, {user?.fullname || "User"}</h2>
+            {user?.aadhaarCardPath && (
+              <div>
+                <small className="text-success">Aadhaar Uploaded ✔</small>
+              </div>
+            )}
+          </div>
+
           <div className="d-flex flex-wrap gap-2">
             <div>
               <h6 className="mb-1">Upload Aadhaar</h6>
